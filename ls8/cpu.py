@@ -2,6 +2,9 @@
 
 import sys
 
+
+
+
 class CPU:
     """Main CPU class."""
 
@@ -10,29 +13,47 @@ class CPU:
         self.ram = [0] * 256
         #registers
         self.reg = [0] * 8
-        
+        # Internal register
+        # program counter
+        self.pc = 0
 
-    def load(self):
+        
+    def load(self, program):
         """Load a program into memory."""
 
         address = 0
 
         # For now, we've just hardcoded a program:
 
-        program = [
-            # From print8.ls8
-            0b10000010, # LDI R0,8
-            0b00000000,
-            0b00001000,
-            0b01000111, # PRN R0
-            0b00000000,
-            0b00000001, # HLT
-        ]
-
-        for instruction in program:
-            self.ram[address] = instruction
-            address += 1
-
+        # program = [
+        #     # From print8.ls8
+        #     0b10000010, # LDI R0,8
+        #     0b00000000,
+        #     0b00001000,
+        #     0b01000111, # PRN R0
+        #     0b00000000,
+        #     0b00000001, # HLT
+        # ]
+        try:
+            with open(program) as p:
+                for line in p:
+                    
+                    #ignore comments
+                    comment_split = line.split('#')
+                    
+                    # Strip white space
+                    num = comment_split[0].strip()
+                    
+                    instruction = int(num)
+                    self.ram[address] = instruction
+                    address +=1
+        except FileNotFoundError:
+            print('FILE NOT FOUND')
+            sys.exit(2)
+            
+            
+    program = sys.argv[1]
+    # load(program)
 
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
@@ -65,4 +86,23 @@ class CPU:
 
     def run(self):
         """Run the CPU."""
-        pass
+        print("hello")
+        while True:
+            # instruction register
+            ir = self.ram[self.pc]
+            # read command
+            op = self.ram_read(ir)
+            # read operands
+            operand_a = self.ram_read(self.pc + 1)
+            operand_b = self.ram_read(self.pc + 2)
+        
+
+            
+    def ram_read(self, mar):  # mar - Memory Address Register
+        """Return value stored at address"""
+        mdr = self.ram[mar]  # mdr - Memory Data Register
+        return mdr
+
+    def ram_write(self, mar, mdr):
+        """Write value to address"""
+        self.ram[mar] = mdr
